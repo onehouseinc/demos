@@ -15,6 +15,11 @@ python3.10 -m pip install boto3
 ```
 
 ## Run the tool
+### Command to run
+```
+python3.10 app.py --region <customer_aws_region> --request-id-prefix <onehouse_request_id_prefix> --database-name <source_db_name>
+```
+
 ### Sample run
 ```
 (db-env) sagarl@dev db-conn-tool % python3.10 app.py --region us-west-2 --request-id-prefix 739935cf --database-name ajax-vpc-db
