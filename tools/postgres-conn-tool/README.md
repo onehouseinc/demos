@@ -26,7 +26,7 @@ python3.10 app.py --region <customer_aws_region> --request-id-prefix <onehouse_r
 ```
 
 ## Understanding the output
-#### When the EKS cluster and database exist in same VPC
+#### When the EKS cluster and database exist in same VPC and setup correctly
 <details>
 <summary>Click to expand</summary>
 
