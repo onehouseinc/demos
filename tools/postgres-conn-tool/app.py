@@ -10,7 +10,7 @@ logger = logging.getLogger()
 parser = argparse.ArgumentParser()
 parser.add_argument('--region', type=str, help='AWS region', required=True)
 parser.add_argument('--request-id-prefix', type=str, help='Onehouse Request ID prefix', required=True)
-parser.add_argument('--database-name', type=str, help='Database name', required=True)
+parser.add_argument('--database-name', type=str, help='Postgres Database name', required=True)
 args = parser.parse_args()
 
 region = args.region
