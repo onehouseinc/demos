@@ -6,7 +6,6 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if project_root not in sys.path:
     sys.path.append(project_root)
 
-
 from checks.utils.generic_utils import *
 from checks.generic_checks import *
 from checks.db_checks import *
@@ -30,14 +29,12 @@ cluster_name = f'onehouse-customer-cluster-{prefix}'
 database_name = args.database_name
 
 # set session
-session = set_session(region)
-
-# check glue schema registry
-check_glue_schema_registry(session)
+aws_utils = AWSUtils(region)
+session = aws_utils.session
 
 # check database infra setup
-check_database(session, database_name)
-check_database_parameter_group(session, database_name)
-check_logical_replication(session, database_name)
-check_logical_replication_effect(session, database_name)
-check_database_reachability(session, database_name, cluster_name)
+database_checks = DatabaseChecks(session, database_name)
+database_checks.perform_all_database_checks()
+
+generic_checks = GenericChecks(session)
+generic_checks.perform_all_generic_checks(database_name, cluster_name)
