@@ -1,4 +1,15 @@
-import src.aws_utils as utils
+import sys
+import os
+
+# Add the project root to sys.path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
+
+from checks.utils.generic_utils import *
+from checks.generic_checks import *
+from checks.db_checks import *
 import argparse
 import logging
 
@@ -19,14 +30,14 @@ cluster_name = f'onehouse-customer-cluster-{prefix}'
 database_name = args.database_name
 
 # set session
-session = utils.set_session(region)
+session = set_session(region)
 
 # check glue schema registry
-utils.check_glue_schema_registry(session)
+check_glue_schema_registry(session)
 
 # check database infra setup
-utils.check_database(session, database_name)
-utils.check_database_parameter_group(session, database_name)
-utils.check_logical_replication(session, database_name)
-utils.check_logical_replication_effect(session, database_name)
-utils.check_database_reachability(session, database_name, cluster_name)
+check_database(session, database_name)
+check_database_parameter_group(session, database_name)
+check_logical_replication(session, database_name)
+check_logical_replication_effect(session, database_name)
+check_database_reachability(session, database_name, cluster_name)
