@@ -2,6 +2,7 @@ import boto3
 import time
 from checks.utils.generic_utils import *
 
+
 class GenericChecks:
     def __init__(self, session: boto3.Session):
         self.session = session

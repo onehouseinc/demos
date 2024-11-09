@@ -1,6 +1,7 @@
 import boto3
 from checks.utils.set_logging import logger
 
+
 class DatabaseChecks:
     def __init__(self, session: boto3.Session, database_name: str):
         self.session = session
@@ -20,7 +21,8 @@ class DatabaseChecks:
             if engine in ['postgres', 'aurora-postgresql'] and db_instance_status == 'available':
                 logger.info(f'Database {database_name} is available ✅')
             else:
-                logger.error(f'Database {database_name} is not available or is not of type postgres/aurora-postgresql ❌')
+                logger.error(
+                    f'Database {database_name} is not available or is not of type postgres/aurora-postgresql ❌')
         except Exception as e:
             logger.error(f'Unable to check if database exists and is available: {e}')
 
@@ -87,7 +89,8 @@ class DatabaseChecks:
             if parameter_apply_status == 'in-sync':
                 logger.info(f'No need for reboot as there no pending-reboot updates in {database_name} ✅')
             elif parameter_apply_status == 'pending-reboot':
-                logger.error(f'Reboot required to make logical replication changes effective in {database_name}, please reboot ❌')
+                logger.error(
+                    f'Reboot required to make logical replication changes effective in {database_name}, please reboot ❌')
             else:
                 logger.error(f'Logical replication has not taken effect in {database_name} ❌')
         except Exception as e:
