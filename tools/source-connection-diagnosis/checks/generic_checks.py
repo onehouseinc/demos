@@ -31,7 +31,7 @@ class GenericChecks:
         self.aws_utils.check_if_db_vpc_equals_eks_vpc(database_name, cluster_name)
 
         logger.info(f'Checking database reachability from {cluster_name}...')
-        path_id = self.aws_utils.setup_reachability_path(database_name, cluster_name)
+        path_id = self.aws_utils.setup_reachability_path_to_db(database_name, cluster_name)
         if path_id:
             try:
                 start_nia_response = self.ec2.start_network_insights_analysis(NetworkInsightsPathId=path_id)
