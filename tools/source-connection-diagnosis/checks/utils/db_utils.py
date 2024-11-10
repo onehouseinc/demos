@@ -2,6 +2,7 @@ import boto3
 import socket
 from checks.utils.set_logging import logger
 
+
 class DatabaseUtils:
     def __init__(self, session: boto3.Session):
         self.session = session
