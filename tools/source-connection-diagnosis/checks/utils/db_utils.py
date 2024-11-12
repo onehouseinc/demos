@@ -1,8 +1,6 @@
 import boto3
 import socket
-import ipaddress
 from checks.utils.set_logging import logger
-
 
 class DatabaseUtils:
     def __init__(self, session: boto3.Session):
@@ -29,15 +27,9 @@ class DatabaseUtils:
         Retrieve the ENI ID from the IP address
         """
         try:
-            # if the IP address is public use the below filter
-            if ipaddress.ip_address(ip_address).is_private:
-                filter_name = 'addresses.private-ip-address'
-            else:
-                filter_name = 'association.public-ip'
-
             response = ec2.describe_network_interfaces(
                 Filters=[
-                    {'Name': filter_name, 'Values': [ip_address]}
+                    {'Name': 'association.public-ip', 'Values': [ip_address]}
                 ]
             )
             eni_id = response['NetworkInterfaces'][0]['NetworkInterfaceId']
