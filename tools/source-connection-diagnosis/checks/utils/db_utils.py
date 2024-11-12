@@ -1,5 +1,6 @@
 import boto3
 import socket
+import ipaddress
 from .set_logging import logger
 
 
@@ -22,17 +23,39 @@ class DatabaseUtils:
             logger.error(f'Error retrieving database IP address: {e}')
             return None
 
+    def is_public_ip(self, ip_address: str) -> bool | None:
+        """
+        Check if the IP address is public
+        """
+        try:
+            ip = ipaddress.ip_address(ip_address)
+            return not ip.is_private
+        except Exception as e:
+            logger.error(f'Error checking if IP address is public: {e}')
+            return None
+
     def get_db_eni(self, ip_address: str) -> str | None:
         ec2 = self.session.client('ec2')
         """
         Retrieve the ENI ID from the IP address
         """
+        is_public_ip = self.is_public_ip(ip_address)
         try:
-            response = ec2.describe_network_interfaces(
-                Filters=[
-                    {'Name': 'association.public-ip', 'Values': [ip_address]}
-                ]
-            )
+            if is_public_ip:
+                response = ec2.describe_network_interfaces(
+                    Filters=[
+                        {'Name': 'association.public-ip', 'Values': [ip_address]}
+                    ]
+                )
+                eni_id = response['NetworkInterfaces'][0]['NetworkInterfaceId']
+                logger.info(f'Database ENI ID: {eni_id}')
+                return eni_id
+            else:
+                response = ec2.describe_network_interfaces(
+                    Filters=[
+                        {'Name': 'addresses.private-ip-address', 'Values': [ip_address]}
+                    ]
+                )
             eni_id = response['NetworkInterfaces'][0]['NetworkInterfaceId']
             logger.info(f'Database ENI ID: {eni_id}')
             return eni_id
