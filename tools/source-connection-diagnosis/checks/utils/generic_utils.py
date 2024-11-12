@@ -7,6 +7,7 @@ class AWSUtils:
     def __init__(self, region: str):
         self.session = boto3.Session(region_name=region)
         self.db_utils = DatabaseUtils(self.session)
+        self.msk_utils = MSKUtils(self.session)
 
     def get_eks_cluster_vpc(self, eks_cluster_name: str) -> str | None:
         eks = self.session.client('eks')
@@ -48,7 +49,7 @@ class AWSUtils:
             print(f"Error describing instance: {e}")
             return None
 
-    def check_if_db_vpc_equals_eks_vpc(self, database_name: str, cluster_name: str) -> None:
+    def check_if_db_vpc_equals_eks_vpc(self, database_name: str, eks_cluster_name: str) -> None:
         """
         Check if the database and the EKS cluster are in the same VPC
         """
@@ -60,7 +61,7 @@ class AWSUtils:
                 return
 
             # Retrieve the security group and VPC ID of the EKS cluster
-            eks_vpc_id = self.get_eks_cluster_vpc(cluster_name)
+            eks_vpc_id = self.get_eks_cluster_vpc(eks_cluster_name)
             if not eks_vpc_id:
                 logger.error('Failed to retrieve EKS cluster VPC ID ❌')
                 return
@@ -75,7 +76,34 @@ class AWSUtils:
             logger.error(f'Error retrieving DB/EKS VPC ID {e}')
             return
 
-    def setup_reachability_path(self, database_name: str, cluster_name: str) -> str | None:
+    def check_if_msk_vpc_equals_eks_vpc(self, msk_cluster_arn: str, eks_cluster_name: str) -> None:
+        """
+        Check if the database and the EKS cluster are in the same VPC
+        """
+        try:
+            # Retrieve the security group and VPC ID of the PostgreSQL database
+            msk_vpc_id = self.msk_utils.get_msk_cluster_vpc(msk_cluster_arn)
+            if not msk_vpc_id:
+                logger.error('Failed to retrieve MSK cluster VPC ID ❌')
+                return
+
+            # Retrieve the security group and VPC ID of the EKS cluster
+            eks_vpc_id = self.get_eks_cluster_vpc(eks_cluster_name)
+            if not eks_vpc_id:
+                logger.error('Failed to retrieve EKS cluster VPC ID ❌')
+                return
+
+            # Check if the VPC IDs are different
+            if msk_vpc_id != eks_vpc_id:
+                logger.warning(f'MSK and EKS cluster are in different VPCs: {msk_vpc_id} and {eks_vpc_id} 🚧')
+            else:
+                logger.info(f'MSK and EKS cluster are in the same VPC: {msk_vpc_id}.')
+
+        except Exception as e:
+            logger.error(f'Error retrieving MSK/EKS VPC ID {e}')
+            return
+
+    def setup_reachability_path_to_db(self, database_name: str, eks_cluster_name: str) -> str | None:
         """
         Setup the reachability path between the database and the EKS cluster
         """
@@ -89,7 +117,7 @@ class AWSUtils:
         if not db_eni:
             return None
 
-        eks_instance_id = self.get_eks_instance_id(cluster_name)
+        eks_instance_id = self.get_eks_instance_id(eks_cluster_name)
         if not eks_instance_id:
             return None
 
