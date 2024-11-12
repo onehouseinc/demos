@@ -1,5 +1,5 @@
 import boto3
-from checks.utils.set_logging import logger
+from .utils.set_logging import logger
 
 
 class DatabaseChecks:
