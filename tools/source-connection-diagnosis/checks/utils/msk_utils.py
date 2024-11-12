@@ -52,4 +52,3 @@ class MSKUtils:
         except Exception as e:
             logger.error(f'Error retrieving MSK cluster VPC: {e}')
             return None
-
