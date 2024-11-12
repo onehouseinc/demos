@@ -25,7 +25,7 @@ python3.10 -m pip install boto3
 python3.10 <tool_name.py> --region <customer_aws_region> --request-id-prefix <onehouse_request_id_prefix> --database-name <source_db_name>
 ```
 
-### Sample command
+### Sample commands
 ```
 (db-env) sagarl@dev source-connection-diagnosis % python3.10 postgres_conn_tool.py --region us-west-2 --request-id-prefix 123456ab --database-name default-vpc-db
 (db-env) sagarl@dev source-connection-diagnosis % python3.10 msk_conn_tool.py --region us-west-2 --request-id-prefix abcdefgh --msk-cluster-arn arn:aws:kafka:us-west-2:1234567890:cluster/cluster_name/123d4567-19d0-482c-bdfc-3c5f0959d3e4-8
