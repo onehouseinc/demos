@@ -1,0 +1,59 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+//    implementation group: 'org.apache.spark', name: 'spark-core_2.12', version: '3.4.0'
+//    implementation 'org.apache.spark:spark-sql_2.12:3.4.0'
+}
+
+dependencies {
+    compileOnly group: "org.apache.hudi", name: "hudi-spark3.2-bundle_2.12", version: "0.14.1"
+}
+
+dependencies {
+    compileOnly("org.apache.spark:spark-sql_2.12:3.2.0")
+    compileOnly("org.apache.spark:spark-avro_2.12:3.2.0")
+//    compileOnly("org.apache.hudi:hudi-utilities_2.12:0.14.1")
+    compileOnly("org.apache.parquet:parquet-avro:1.12.3")
+//    compileOnly("org.apache.hudi:hudi-common:0.14.1")
+    testImplementation("org.apache.spark:spark-sql_2.12:3.2.0")
+    testImplementation("org.apache.spark:spark-avro_2.12:3.2.0")
+    testImplementation("org.apache.hudi:hudi-utilities_2.12:0.14.1")
+    testImplementation("org.apache.parquet:parquet-avro:1.12.3")
+    testImplementation("org.apache.hudi:hudi-common:0.14.1")
+    testImplementation(platform("org.junit:junit-bom:5.9.1"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'org.example.HudiWriteExample'
+    }
+}
+
+//tasks.shadowJar {
+//    archiveClassifier.set("")  // Set to empty to replace the regular JAR
+//    manifest {
+//        attributes["Main-Class"] = "org.example.HudiWriteExample"  // Replace with your main class
+//    }
+//    exclude("**/*.kotlin_metadata") // Optionally exclude Kotlin metadata files
+//    exclude("META-INF/*.SF")
+//    exclude("META-INF/*.DSA")
+//    exclude("META-INF/*.RSA")
+//}
