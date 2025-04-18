@@ -1,0 +1,66 @@
+plugins {
+    id("java")
+    id("application")
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://packages.confluent.io/maven/' }
+    maven { url "https://repo.osgeo.org/repository/release/" }
+    maven { url "https://nexus.pentaho.org/content/groups/omni/" }
+    maven {
+        url 'https://repository.apache.org/content/repositories/snapshots/'
+        mavenContent { snapshotsOnly() }
+    }
+}
+
+ext {
+    flinkVersion = '1.17.2'
+    flinkBinaryVersion = '1.17'
+    hudiVersion = '0.14.0'
+    log4jVersion = '2.17.1'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    // Hudi dependency
+    implementation "org.apache.hudi:hudi-flink${flinkBinaryVersion}-bundle:${hudiVersion}"
+
+    // Apache Flink dependencies
+    implementation "org.apache.flink:flink-streaming-java:${flinkVersion}"
+    implementation "org.apache.flink:flink-clients:${flinkVersion}"
+    implementation "org.apache.flink:flink-connector-kafka:${flinkVersion}"
+    implementation "org.apache.flink:flink-table-common:${flinkVersion}"
+    implementation "org.apache.flink:flink-table-runtime:${flinkVersion}"
+
+    // Schema Registry dependencies
+    implementation "io.confluent:kafka-schema-registry-client:7.4.0"
+    implementation "io.confluent:kafka-avro-serializer:7.4.0"
+    implementation "org.apache.avro:avro:1.11.1"
+    implementation "org.apache.flink:flink-avro:${flinkVersion}"
+    implementation "org.apache.flink:flink-avro-confluent-registry:${flinkVersion}"
+
+    // Log4j dependencies (runtime only)
+    runtimeOnly "org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}"
+    runtimeOnly "org.apache.logging.log4j:log4j-api:${log4jVersion}"
+    runtimeOnly "org.apache.logging.log4j:log4j-core:${log4jVersion}"
+
+    // Hadoop dependencies (provided)
+    compileOnly "org.apache.hadoop:hadoop-hdfs:3.1.4"
+    compileOnly "org.apache.hadoop:hadoop-common:3.1.4"
+}
+
+application {
+    mainClass.set("FlinkHudiJob")
+}
+
+tasks.shadowJar {
+    zip64 = true
+}
+
+tasks.jar {
+    manifest { attributes["Main-Class"] = "FlinkHudiJob" }
+}
