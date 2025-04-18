@@ -1,0 +1,7 @@
+pyspark==3.4.3
+pandas==2.2.3
+python-dateutil==2.9.0
+pytz==2024.2
+tzdata==2024.2
+venv-pack==0.2.0 
+dlt==1.9.0
