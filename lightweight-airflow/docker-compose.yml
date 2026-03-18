@@ -1,0 +1,73 @@
+x-airflow-common: &airflow-common
+  build: .
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__PARALLELISM: "8"
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY:-change-me-in-production}
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+
+    # Onehouse SQL connection (Spark Thrift Server / HiveServer2)
+    # Override host/port via .env if your tunnel uses different settings
+    AIRFLOW_CONN_ONEHOUSE_SQL: >-
+      hiveserver2://${HIVE_USER:-hive}:${HIVE_PASSWORD:-hive}@${HIVE_HOST:-host.docker.internal}:${HIVE_PORT:-10000}/default?auth=NOSASL
+
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./logs:/opt/airflow/logs
+    - ./plugins:/opt/airflow/plugins
+  # Needed for local Mac dev only (SSM tunnel on host's localhost).
+  # On EC2, set HIVE_HOST to the internal DNS of the Spark Thrift Server
+  # and remove or ignore this — containers reach it directly via VPC.
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+
+  airflow-init:
+    <<: *airflow-common
+    user: "0:0"
+    command: bash -c "mkdir -p /opt/airflow/logs /opt/airflow/plugins && chown -R 50000:0 /opt/airflow/logs /opt/airflow/plugins && airflow db migrate && airflow users create --username ${AIRFLOW_USER:-admin} --password ${AIRFLOW_PASSWORD:-admin} --firstname Admin --lastname User --role Admin --email admin@example.com || true"
+    restart: "no"
+
+  scheduler:
+    <<: *airflow-common
+    command: airflow scheduler
+    restart: unless-stopped
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  webserver:
+    <<: *airflow-common
+    command: airflow webserver
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  postgres_data:
