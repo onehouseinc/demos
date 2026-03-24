@@ -15,5 +15,6 @@ USER airflow
 RUN pip install --no-cache-dir \
     apache-airflow-providers-apache-hive \
     apache-airflow-providers-common-sql \
+    apache-airflow-providers-onehouse \
     "pyhive[hive_pure_sasl]" \
     --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.10.5/constraints-3.12.txt"
